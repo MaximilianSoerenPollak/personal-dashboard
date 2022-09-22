@@ -58,6 +58,7 @@ Doing the backend with an API will give me easy expandability to new functions (
 The MVP should consist of two things.
 - API backend.
 - One graph in the dashboard.
+- *Edit* CLI to interact with the API / request the dashboard.
 
 I want to have a working API that can give me up to date (if necessary) data for the single chart I will have in the Dashboard.  
 
@@ -79,7 +80,11 @@ know the more I will want to re-write the old code I cobbled together sometime p
 
 I honestly have no idea. Since I've recently started a new Job that will take a lot of brain power to learn a lot of new things.  
 I hope I can get meaningful progress in this project since as said above it is a way to learn GO for me, and that I'm rather excited about.  
-So no strict timeline or deadline but I do hope to make constant (if probably slow) progress.
+So no strict timeline or deadline but I do hope to make constant (if probably slow) progress.  
+
+*Update*: I have now finished the very basics of learning the GO syntax and will now start with building the API.
+I'm guessing this will be a much harder step than learning basic syntax but I'm excited to find out if that is the case.
+
 
 ## What if I find something that is horribly done in this code?
 
@@ -90,6 +95,6 @@ I would also be very appreciative if you would tell me why that is a horrible im
 ## Roadmap
 
 - [x] Write the first README outlining the project
-- [ ] Learn basic GO syntax
+- [x] Learn basic GO syntax
 - [ ] Write the API
 - [ ] Implement first Dashboard-Chart
