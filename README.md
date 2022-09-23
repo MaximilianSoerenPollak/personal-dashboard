@@ -61,8 +61,10 @@ The MVP should consist of two things.
 - *Edit* CLI to interact with the API / request the dashboard.
 
 I want to have a working API that can give me up to date (if necessary) data for the single chart I will have in the Dashboard.  
-
 I'm not sure which Graph this will be yet, still have to figure that out.
+
+*Edit* : I have decided to do this with the "Gin" framework and use an SQLite3 DB as my database.
+It's good enough for what I need, and easy to set up. First API routes as well as the DB integration for one are already done.
 
 ## Will there be other "iterations" than the MVP?
 
