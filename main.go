@@ -1,44 +1,51 @@
 package main
 
 import (
-    "github.com/gin-gonic/gin"
+	"dashboard/models"
+	"github.com/gin-gonic/gin"
+	"log"
 )
 
-type tasklist struct{
-    Name string `json:"name"`
-    Tasks []task `json:"tasks"`
-}  
-
-type task struct {
-    Name string `json:"name"`
-}
-    
-
-var list1 = tasklist{
-    Name: "Tasklist1",
-    Tasks: []task{},
+func checkErr(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-func (tl *tasklist) AddTaskToList(t string) []task {
-    tsk := task{t}
-    tl.Tasks = append(tl.Tasks, tsk)
-    return tl.Tasks
+func createTask(c *gin.Context) {
+	c.JSON(200, gin.H{"message": "A new Record Created!"})
 }
 
+func readTask(c *gin.Context) {
+	tasks, err := models.GetTasks()
+	checkErr(err)
+
+	if tasks == nil {
+		c.JSON(404, gin.H{"error": "No records found"})
+		return
+	} else {
+
+		c.IndentedJSON(200, gin.H{"data": tasks})
+	}
+}
+
+func updateTask(c *gin.Context) {
+	c.JSON(200, gin.H{"message": "Record Updated!"})
+}
+func deleteTask(c *gin.Context) {
+	c.JSON(200, gin.H{"message": "Record Deleted!"})
+}
 func main() {
-    r := gin.Default()
-    list1.AddTaskToList("TestingTheFunction")
-    r.GET("/tab", func(c * gin.Context) { 
-        c.JSON(200, gin.H {
-            "message": "nine",
-        })
-    })
-    for _,v := range list1.Tasks {
-    r.GET("/tasks", func(c *gin.Context) {
-        c.JSON(200, gin.H {
-            "Tasks": v,
-        })
-    })
-    }
-    r.Run()
+	err := models.ConnectDatabase()
+	checkErr(err)
+
+	r := gin.Default()
+	router := r.Group("/tasks")
+	{
+		router.POST("/create", createTask)
+		router.GET("/", readTask)
+		router.POST("update/:id", updateTask)
+		router.DELETE("/delete/:id", deleteTask)
+	}
+	r.Run()
 }
