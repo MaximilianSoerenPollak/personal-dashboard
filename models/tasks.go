@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -40,13 +41,30 @@ func GetTasks() ([]Task, error) {
 	return tasks, nil
 }
 
-func CreateTasks(n string) (string, error) {
-	_, err := DB.Query("INSERT INTO tasks(name, status) values('?', 0)", n)
+func GetOneTask(id int) (Task, error) {
+	var searchedTask Task
+	query, err := DB.Query("SELECT * FROM tasks WHERE id = ?", id)
 	if err != nil {
-		return err.Error(), nil
+		return searchedTask, err
 	}
-	response_string := "The task was added to the Database."
-	return response_string, nil
+	query.Next()
+	err = query.Scan(&searchedTask.ID, &searchedTask.Name, &searchedTask.Status)
+	if err != nil {
+		return searchedTask, err
+	}
+	return searchedTask, nil
+}
+
+func CreateTasks(n string) (int64, error) {
+	r, err := DB.Exec("INSERT INTO tasks(name, status) values(?, 0)", n)
+	if err != nil {
+		log.Println(err, n)
+	}
+	id, err := r.LastInsertId()
+	if err != nil {
+		log.Println(err, n, id)
+	}
+	return id, nil
 }
 
 func ConnectDatabase() error {

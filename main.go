@@ -28,23 +28,38 @@ func createTask(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadRequest)
 	} else {
 		log.Println("This is task", task.Name)
-		models.CreateTasks(task.Name)
+		_, err := models.CreateTasks(task.Name)
+		checkErr(err)
 		c.IndentedJSON(http.StatusCreated, task)
+
 	}
 }
 
 func readTask(c *gin.Context) {
 	tasks, err := models.GetTasks()
-	checkErr(err)
+	checkerr(err)
 
 	if tasks == nil {
-		c.JSON(404, gin.H{"error": "No records found"})
+		c.JSON(404, gin.H{"error": "no records found"})
 		return
 	} else {
 		c.IndentedJSON(200, gin.H{"data": tasks})
 	}
 }
 
+func readOneTask(c *gin.Context) {
+    id := c.Param("id") 
+    query, err := DB.query("SELECT * FROM tasks WHERE id = ?", id)
+	checkerr(err)
+
+	if tasks == nil {
+		c.JSON(404, gin.H{"error": "no records found"})
+		return
+	} else {
+		c.IndentedJSON(200, gin.H{"data": tasks})
+	}
+
+}
 func updateTask(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "Record Updated!"})
 }
