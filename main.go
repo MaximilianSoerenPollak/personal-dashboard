@@ -5,10 +5,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
+// checkErr function    Small custom Error logger function.
+// TO-DO Need to re-do this function so that it has the creation of the error log file etc. 
+// TO-DO Make sure to use this fucntion everywhere so it's more cohesive in the code.
 func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
@@ -17,7 +21,7 @@ func checkErr(err error) {
 
 func createTask(c *gin.Context) {
 	var task models.Task
-	task.Status = 0
+
 	file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatal(err)
@@ -28,16 +32,17 @@ func createTask(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadRequest)
 	} else {
 		log.Println("This is task", task.Name)
-		_, err := models.CreateTasks(task.Name)
+		task, err := models.CreateTasks(task.Name, task.Status)
 		checkErr(err)
 		c.IndentedJSON(http.StatusCreated, task)
 
 	}
 }
 
+// readTask function    This is to read all tasks in the Database
 func readTask(c *gin.Context) {
 	tasks, err := models.GetTasks()
-	checkerr(err)
+	checkErr(err)
 
 	if tasks == nil {
 		c.JSON(404, gin.H{"error": "no records found"})
@@ -47,23 +52,30 @@ func readTask(c *gin.Context) {
 	}
 }
 
+// readOneTask function    This is to read just ONE task in the  DB. 
 func readOneTask(c *gin.Context) {
-    id := c.Param("id") 
-    query, err := DB.query("SELECT * FROM tasks WHERE id = ?", id)
-	checkerr(err)
-
-	if tasks == nil {
+	id := c.Param("id")
+    // Converting the string param 'id' to an int via 'strconv.Atoi'
+	id_int, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(404, gin.H{"error": "Could not convert ID to int"})
+	}
+	task, err := models.GetOneTask(id_int)
+	checkErr(err)
+	if task.Name == "" && task.Status == 0 {
 		c.JSON(404, gin.H{"error": "no records found"})
 		return
 	} else {
-		c.IndentedJSON(200, gin.H{"data": tasks})
+		c.IndentedJSON(200, gin.H{"data": task})
 	}
 
 }
+// updateTask function    TO-DO: Still need to implement this function
 func updateTask(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "Record Updated!"})
 }
 
+// deleteTask function    TO-DO: Still need to implement this function
 func deleteTask(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "Record Deleted!"})
 }

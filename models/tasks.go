@@ -41,6 +41,7 @@ func GetTasks() ([]Task, error) {
 	return tasks, nil
 }
 
+// Use QueryRow instead of query maybe?
 func GetOneTask(id int) (Task, error) {
 	var searchedTask Task
 	query, err := DB.Query("SELECT * FROM tasks WHERE id = ?", id)
@@ -55,17 +56,26 @@ func GetOneTask(id int) (Task, error) {
 	return searchedTask, nil
 }
 
-func CreateTasks(n string) (int64, error) {
-	r, err := DB.Exec("INSERT INTO tasks(name, status) values(?, 0)", n)
+func CreateTasks(n string, x int) (Task, error) {
+	r, err := DB.Exec("INSERT INTO tasks(name, status) values(?, ?)", n, x)
 	if err != nil {
 		log.Println(err, n)
 	}
-	id, err := r.LastInsertId()
+     
+	id, err := r.LastInsertId() 
 	if err != nil {
 		log.Println(err, n, id)
 	}
-	return id, nil
+    task, err := GetOneTask(int(id))
+    if err != nil {
+        log.Println(err, n, id, "Function: GetOneTask")
+    }
+	return task, nil
 }
+
+// TO-DO integrate the Update Task route.
+// func UpdateTask(id int) (Task, error) {
+//     r, err = DB.Exec
 
 func ConnectDatabase() error {
 	db, err := sql.Open("sqlite3", "./sqlite.db")
