@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"log"
+	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -61,21 +62,80 @@ func CreateTasks(n string, x int) (Task, error) {
 	if err != nil {
 		log.Println(err, n)
 	}
-     
-	id, err := r.LastInsertId() 
+
+	id, err := r.LastInsertId()
 	if err != nil {
 		log.Println(err, n, id)
 	}
-    task, err := GetOneTask(int(id))
-    if err != nil {
-        log.Println(err, n, id, "Function: GetOneTask")
-    }
+	task, err := GetOneTask(int(id))
+	if err != nil {
+		log.Println(err, n, id, "Function: GetOneTask")
+	}
 	return task, nil
 }
 
-// TO-DO integrate the Update Task route.
-// func UpdateTask(id int) (Task, error) {
-//     r, err = DB.Exec
+// UpdateTask function    status(st) and name(n) are optional' inputs
+//TO-DO FIX: Does not error out if route does not work (sends back HTTP 200)
+// TO-DO: PArameters are still not read correctly at all (always come up as null PARAM)
+// Resource here: https://blog.petehouston.com/parse-query-string-in-gin-web-application/
+func UpdateTask(id int, st, n string) (Task, error) {
+	if st == "" {
+		_, err := DB.Exec("UPDATE tasks SET name=? WHERE id=?", n, id)
+		// This is not a properly handeled error I think. But for MVP is aight.
+		if err != nil {
+			log.Println(err, id, st, n, "Function: UpdateTask, st=''")
+		}
+	}
+	if n == "" {
+		st_int, err := strconv.Atoi(st)
+		if err != nil {
+			log.Println("conversion of st failed")
+		}
+		// This is not a properly handeled error I think. But for MVP is aight.
+		_, err = DB.Exec("UPDATE tasks SET status=? WHERE id=?", st_int, id)
+		if err != nil {
+			log.Println(err, id, st, n, "Function: UpdateTask, n=''")
+		}
+	}
+	if n == "" && st == "" {
+		_, err := DB.Exec("UPDATE tasks SET name=?, status=? WHERE id=?", n, st, id)
+		if err != nil {
+			log.Println(err, id, st, n, "Function: UpdateTask, n and st not '' ")
+		}
+	}
+
+	// switch {
+	// case st == "":
+	// 	{
+	// 		_, err := DB.Exec("UPDATE task SET name=? WHERE id=?", n, id)
+	// 		// This is not a properly handeled error I think. But for MVP is aight.
+	// 		if err != nil {
+	// 			log.Println(err, id, st, n, "Function: UpdateTask, st=''")
+	// 		}
+	// 	}
+	// case n == "":
+	// 	{
+	// 		// This is not a properly handeled error I think. But for MVP is aight.
+	// 		_, err := DB.Exec("UPDATE task SET status=? WHERE id=?", st, id)
+	// 		if err != nil {
+	// 			log.Println(err, id, st, n, "Function: UpdateTask, n=''")
+	// 		}
+	// 	}
+	// case n == "" && st == "":
+	// 	{
+	// 		_, err := DB.Exec("UPDATE task SET name=?, status=? WHERE id=?", n, st, id)
+	// 		if err != nil {
+	// 			log.Println(err, id, st, n, "Function: UpdateTask, n and st not '' ")
+	// 		}
+	// 	}
+	// }
+	// we get the updated task (Hopefully)
+	task, err := GetOneTask(id)
+	if err != nil {
+		log.Println(err, id, st, n, "Function: UpdateTask")
+	}
+	return task, nil
+}
 
 func ConnectDatabase() error {
 	db, err := sql.Open("sqlite3", "./sqlite.db")
