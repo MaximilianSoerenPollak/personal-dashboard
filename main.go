@@ -74,29 +74,22 @@ func readOneTask(c *gin.Context) {
 // updateTask function    TO-DO: Still need to implement this function
 func updateTask(c *gin.Context) {
     log.SetOutput(file)
-	test, ok := c.Params.Get("name")
-	if ok {
-		log.Println("This is the param name in a test", test)
-	} else {
-		log.Println("The param could not be gotten it's empty. ok came back false")
-	}
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(400, gin.H{"error": "Please make sure you attach the ID parameter"})
 	}
-	name := c.Param("name")
-	log.Println("This is the param name in updateTask after it was read", name)
-	status := c.Param("status")
-	log.Println("This is the param status in updateTask after it was read", status)
+	name := c.DefaultQuery("name", "")
+	status := c.DefaultQuery("status", "0")
 	id_int, err := strconv.Atoi(id)
 	if err != nil {
 		c.JSON(404, gin.H{"error": "Could not convert ID to int"})
 	}
 	task, err := models.UpdateTask(id_int, status, name)
 	if err != nil {
+        log.Println(err)
 		c.JSON(500, gin.H{"error": "Something went horribly wrong"})
 	}
-	c.JSON(200, gin.H{"message": "Record Updated!", "Updated Record": task})
+	c.IndentedJSON(200, gin.H{"message": "Record Updated!", "Updated Record": task})
 }
 
 // deleteTask function    TO-DO: Still need to implement this function

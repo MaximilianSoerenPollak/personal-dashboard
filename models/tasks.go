@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"strconv"
 
@@ -14,6 +15,16 @@ type Task struct {
 	ID     int    `json:"id"`
 	Name   string `json:"name"`
 	Status int    `json:"status"`
+}
+
+type ParamError struct {
+	function string
+	params   []string
+	Err      error
+}
+
+func (pa *ParamError) Error() string {
+	return fmt.Sprintf("Error %v, occured in function %v, params %v involved", pa.Err, pa.function, pa.params)
 }
 
 func GetTasks() ([]Task, error) {
@@ -79,31 +90,44 @@ func CreateTasks(n string, x int) (Task, error) {
 // TO-DO: PArameters are still not read correctly at all (always come up as null PARAM)
 // Resource here: https://blog.petehouston.com/parse-query-string-in-gin-web-application/
 func UpdateTask(id int, st, n string) (Task, error) {
-	if st == "" {
-		_, err := DB.Exec("UPDATE tasks SET name=? WHERE id=?", n, id)
-		// This is not a properly handeled error I think. But for MVP is aight.
-		if err != nil {
-			log.Println(err, id, st, n, "Function: UpdateTask, st=''")
+	switch {
+	case (n == "" && st == "0"):
+		{
+			log.Println(id, st, n, "Function: UpdateTask, n and st not '' ")
+			return Task{}, &ParamError{
+				function: "UpdateTask",
+				params:   []string{"Name", "Status"},
+				Err:      fmt.Errorf("params were empty"),
+			}
+		}
+	case st == "0":
+		{
+			_, err := DB.Exec("UPDATE tasks SET name=? WHERE id=?", n, id)
+			// This is not a properly handeled error I think. But for MVP is aight.
+			if err != nil {
+				log.Println(err, id, st, n, "Function: UpdateTask, st=''")
+			}
+		}
+	case n == "":
+		{
+			st_int, err := strconv.Atoi(st)
+			if err != nil {
+				log.Println("conversion of st failed")
+			}
+			// This is not a properly handeled error I think. But for MVP is aight.
+			_, err = DB.Exec("UPDATE tasks SET status=? WHERE id=?", st_int, id)
+			if err != nil {
+				log.Println(err, id, st, n, "Function: UpdateTask, n=''")
+			}
+		}
+	default:
+		{
+			_, err := DB.Exec("UPDATE tasks SET name=?, status=? WHERE id=?", n, st, id)
+			if err != nil {
+				log.Println(err, id, st, n, "Function: UpdateTask failed at inserting data into DB")
+			}
 		}
 	}
-	if n == "" {
-		st_int, err := strconv.Atoi(st)
-		if err != nil {
-			log.Println("conversion of st failed")
-		}
-		// This is not a properly handeled error I think. But for MVP is aight.
-		_, err = DB.Exec("UPDATE tasks SET status=? WHERE id=?", st_int, id)
-		if err != nil {
-			log.Println(err, id, st, n, "Function: UpdateTask, n=''")
-		}
-	}
-	if n == "" && st == "" {
-		_, err := DB.Exec("UPDATE tasks SET name=?, status=? WHERE id=?", n, st, id)
-		if err != nil {
-			log.Println(err, id, st, n, "Function: UpdateTask, n and st not '' ")
-		}
-	}
-
 	// switch {
 	// case st == "":
 	// 	{
