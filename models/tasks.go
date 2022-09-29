@@ -128,37 +128,22 @@ func UpdateTask(id int, st, n string) (Task, error) {
 			}
 		}
 	}
-	// switch {
-	// case st == "":
-	// 	{
-	// 		_, err := DB.Exec("UPDATE task SET name=? WHERE id=?", n, id)
-	// 		// This is not a properly handeled error I think. But for MVP is aight.
-	// 		if err != nil {
-	// 			log.Println(err, id, st, n, "Function: UpdateTask, st=''")
-	// 		}
-	// 	}
-	// case n == "":
-	// 	{
-	// 		// This is not a properly handeled error I think. But for MVP is aight.
-	// 		_, err := DB.Exec("UPDATE task SET status=? WHERE id=?", st, id)
-	// 		if err != nil {
-	// 			log.Println(err, id, st, n, "Function: UpdateTask, n=''")
-	// 		}
-	// 	}
-	// case n == "" && st == "":
-	// 	{
-	// 		_, err := DB.Exec("UPDATE task SET name=?, status=? WHERE id=?", n, st, id)
-	// 		if err != nil {
-	// 			log.Println(err, id, st, n, "Function: UpdateTask, n and st not '' ")
-	// 		}
-	// 	}
-	// }
-	// we get the updated task (Hopefully)
+    // Then get the ID of the changed task. => Need to see if this is a good way or not.
 	task, err := GetOneTask(id)
 	if err != nil {
 		log.Println(err, id, st, n, "Function: UpdateTask")
 	}
 	return task, nil
+}
+
+
+func DeleteTask(id int) error {
+    _, err := DB.Exec("DELETE FROM tasks WHERE id=?", id)
+    if err != nil {
+        log.Println(err, "Function: DeleteTask")
+        return err
+    }
+    return nil
 }
 
 func ConnectDatabase() error {

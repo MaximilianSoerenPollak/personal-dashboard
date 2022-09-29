@@ -94,6 +94,19 @@ func updateTask(c *gin.Context) {
 
 // deleteTask function    TO-DO: Still need to implement this function
 func deleteTask(c *gin.Context) {
+    id := c.Param("id")
+	if id == "" {
+		c.JSON(400, gin.H{"error": "Please make sure you attach the ID parameter"})
+	}
+    id_int, err := strconv.Atoi(id)
+    if err != nil {
+		c.JSON(404, gin.H{"error": "Could not convert ID to int"})
+    }
+    err = models.DeleteTask(id_int)
+    if err != nil {
+        log.Println(err, "Function: After the deleteTask call")
+        c.JSON(400, gin.H{"error": "Something went terribly wrong"})
+    }
 	c.JSON(200, gin.H{"message": "Record Deleted!"})
 }
 
