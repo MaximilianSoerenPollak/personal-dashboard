@@ -58,7 +58,7 @@ func readOneTask(c *gin.Context) {
 	// Converting the string param 'id' to an int via 'strconv.Atoi'
 	id_int, err := strconv.Atoi(id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Could not convert ID to int"})
+		c.JSON(400, gin.H{"error": "Expected ID to be a number"})
 	}
 	task, err := models.GetOneTask(id_int)
 	checkErr(err)
@@ -82,7 +82,7 @@ func updateTask(c *gin.Context) {
 	status := c.DefaultQuery("status", "0")
 	id_int, err := strconv.Atoi(id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": "Could not convert ID to int"})
+		c.JSON(400, gin.H{"error": "Expected ID to be a number"})
 	}
 	task, err := models.UpdateTask(id_int, status, name)
 	if err != nil {
@@ -100,7 +100,7 @@ func deleteTask(c *gin.Context) {
 	}
     id_int, err := strconv.Atoi(id)
     if err != nil {
-		c.JSON(404, gin.H{"error": "Could not convert ID to int"})
+		c.JSON(400, gin.H{"error": "Expected ID to be a number"})
     }
     err = models.DeleteTask(id_int)
     if err != nil {
