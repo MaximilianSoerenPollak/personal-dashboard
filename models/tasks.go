@@ -27,6 +27,7 @@ func (pa *ParamError) Error() string {
 	return fmt.Sprintf("Error %v, occured in function %v, params %v involved", pa.Err, pa.function, pa.params)
 }
 
+
 func GetTasks() ([]Task, error) {
 	rows, err := DB.Query("SELECT * FROM tasks")
 	if err != nil {
@@ -128,7 +129,7 @@ func UpdateTask(id int, st, n string) (Task, error) {
 			}
 		}
 	}
-    // Then get the ID of the changed task. => Need to see if this is a good way or not.
+	// Then get the ID of the changed task. => Need to see if this is a good way or not.
 	task, err := GetOneTask(id)
 	if err != nil {
 		log.Println(err, id, st, n, "Function: UpdateTask")
@@ -136,14 +137,13 @@ func UpdateTask(id int, st, n string) (Task, error) {
 	return task, nil
 }
 
-
 func DeleteTask(id int) error {
-    _, err := DB.Exec("DELETE FROM tasks WHERE id=?", id)
-    if err != nil {
-        log.Println(err, "Function: DeleteTask")
-        return err
-    }
-    return nil
+	_, err := DB.Exec("DELETE FROM tasks WHERE id=?", id)
+	if err != nil {
+		log.Println(err, "Function: DeleteTask")
+		return err
+	}
+	return nil
 }
 
 func ConnectDatabase() error {

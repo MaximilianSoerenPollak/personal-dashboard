@@ -13,7 +13,8 @@ import (
 // checkErr function    Small custom Error logger function.
 // TO-DO Need to re-do this function so that it has the creation of the error log file etc.
 // TO-DO Make sure to use this fucntion everywhere so it's more cohesive in the code.
-var	file, err = os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+var file, err = os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+
 func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
@@ -22,7 +23,7 @@ func checkErr(err error) {
 
 func createTask(c *gin.Context) {
 	var task models.Task
-    log.SetOutput(file)
+	log.SetOutput(file)
 
 	if err != nil {
 		log.Fatal(err)
@@ -73,7 +74,7 @@ func readOneTask(c *gin.Context) {
 
 // updateTask function    TO-DO: Still need to implement this function
 func updateTask(c *gin.Context) {
-    log.SetOutput(file)
+	log.SetOutput(file)
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(400, gin.H{"error": "Please make sure you attach the ID parameter"})
@@ -86,7 +87,7 @@ func updateTask(c *gin.Context) {
 	}
 	task, err := models.UpdateTask(id_int, status, name)
 	if err != nil {
-        log.Println(err)
+		log.Println(err)
 		c.JSON(500, gin.H{"error": "Something went horribly wrong"})
 	}
 	c.IndentedJSON(200, gin.H{"message": "Record Updated!", "Updated Record": task})
@@ -94,33 +95,37 @@ func updateTask(c *gin.Context) {
 
 // deleteTask function    TO-DO: Still need to implement this function
 func deleteTask(c *gin.Context) {
-    id := c.Param("id")
+	id := c.Param("id")
 	if id == "" {
 		c.JSON(400, gin.H{"error": "Please make sure you attach the ID parameter"})
 	}
-    id_int, err := strconv.Atoi(id)
-    if err != nil {
+	id_int, err := strconv.Atoi(id)
+	if err != nil {
 		c.JSON(400, gin.H{"error": "Expected ID to be a number"})
-    }
-    err = models.DeleteTask(id_int)
-    if err != nil {
-        log.Println(err, "Function: After the deleteTask call")
-        c.JSON(400, gin.H{"error": "Something went terribly wrong"})
-    }
+	}
+	err = models.DeleteTask(id_int)
+	if err != nil {
+		log.Println(err, "Function: After the deleteTask call")
+		c.JSON(400, gin.H{"error": "Something went terribly wrong"})
+	}
 	c.JSON(200, gin.H{"message": "Record Deleted!"})
 }
 
-func main() {
-	err := models.ConnectDatabase()
-	checkErr(err)
-
+func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	router := r.Group("/tasks")
 	{
 		router.POST("/create", createTask)
 		router.GET("/", readTask)
-        router.POST("/update/:id", updateTask)
+		router.POST("/update/:id", updateTask)
 		router.DELETE("/delete/:id", deleteTask)
 	}
+	return r
+}
+
+func main() {
+	err := models.ConnectDatabase()
+	checkErr(err)
+	r := SetupRouter()
 	r.Run()
 }
